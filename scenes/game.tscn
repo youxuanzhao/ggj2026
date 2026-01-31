@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://ia3sexn5fic1"]
+
+[ext_resource type="Script" uid="uid://wjle3cuvwwub" path="res://scripts/game_manager.gd" id="1_yqjtg"]
+[ext_resource type="Script" uid="uid://dvgpta3lctfil" path="res://scripts/game_renderer.gd" id="2_yqjtg"]
+
+[node name="GameManager" type="Node2D" unique_id=163313851]
+script = ExtResource("1_yqjtg")
+
+[node name="GameRenderer" type="Node2D" parent="." unique_id=710285525]
+script = ExtResource("2_yqjtg")

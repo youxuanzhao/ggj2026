@@ -1,0 +1,8 @@
+[gd_resource type="LabelSettings" format=3 uid="uid://cjvd3h4n81ppr"]
+
+[ext_resource type="FontFile" uid="uid://cani70bdd6xyd" path="res://assets/fonts/JetBrainsMono-Regular.ttf" id="1_l7n54"]
+
+[resource]
+font = ExtResource("1_l7n54")
+font_size = 120
+shadow_size = 0

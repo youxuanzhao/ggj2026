@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="LevelData" format=3 uid="uid://d0lykank4ghdn"]
+
+[ext_resource type="Script" uid="uid://dqaom3e0tkdro" path="res://scripts/piece_data.gd" id="1_133bd"]
+[ext_resource type="Script" uid="uid://c6s3gxixlxerl" path="res://scripts/pattern_data.gd" id="1_vgqkp"]
+[ext_resource type="Script" uid="uid://g0oh2qswljlj" path="res://scripts/level_data.gd" id="2_vgqkp"]
+
+[sub_resource type="Resource" id="Resource_tg8vp"]
+script = ExtResource("1_vgqkp")
+allowed_states = [[0, 1, 1], [0, 0, 0], [0, 0, 0]]
+metadata/_custom_type_script = "uid://c6s3gxixlxerl"
+
+[sub_resource type="Resource" id="Resource_vgqkp"]
+script = ExtResource("1_133bd")
+shape_cells = [[0, 1]]
+metadata/_custom_type_script = "uid://dqaom3e0tkdro"
+
+[sub_resource type="Resource" id="Resource_6r273"]
+script = ExtResource("1_133bd")
+color = "black"
+shape_cells = [[1, 1], [1, 2]]
+z_order = 1
+metadata/_custom_type_script = "uid://dqaom3e0tkdro"
+
+[resource]
+script = ExtResource("2_vgqkp")
+pieces = Array[ExtResource("1_133bd")]([SubResource("Resource_vgqkp"), SubResource("Resource_6r273")])
+patterns = Array[ExtResource("1_vgqkp")]([SubResource("Resource_tg8vp")])
+metadata/_custom_type_script = "uid://g0oh2qswljlj"

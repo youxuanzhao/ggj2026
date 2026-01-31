@@ -1,0 +1,53 @@
+[gd_scene format=3 uid="uid://cwfhn401rwput"]
+
+[ext_resource type="LabelSettings" uid="uid://cjvd3h4n81ppr" path="res://assets/fonts/title_text.tres" id="1_4ignj"]
+[ext_resource type="Script" uid="uid://bhx6c63fy8q3u" path="res://scripts/title.gd" id="1_p6dhs"]
+[ext_resource type="FontFile" uid="uid://cani70bdd6xyd" path="res://assets/fonts/JetBrainsMono-Regular.ttf" id="3_pyl7j"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_wosw1"]
+font = ExtResource("3_pyl7j")
+font_size = 80
+shadow_size = 0
+
+[sub_resource type="LabelSettings" id="LabelSettings_p6dhs"]
+font = ExtResource("3_pyl7j")
+font_size = 120
+font_color = Color(0, 0, 0, 1)
+outline_size = 3
+outline_color = Color(0, 0, 0, 1)
+shadow_size = 0
+
+[node name="TitleScene" type="Node2D" unique_id=1825217099]
+script = ExtResource("1_p6dhs")
+
+[node name="TitleWhite" type="Label" parent="." unique_id=2130227503]
+offset_left = 185.0
+offset_top = 274.0
+offset_right = 712.0
+offset_bottom = 395.0
+text = "Occlusion"
+label_settings = ExtResource("1_4ignj")
+
+[node name="Option1" type="Label" parent="." unique_id=1173626560]
+offset_left = 185.0
+offset_top = 620.0
+offset_right = 712.0
+offset_bottom = 741.0
+text = "> Start"
+label_settings = SubResource("LabelSettings_wosw1")
+
+[node name="Option2" type="Label" parent="." unique_id=712330888]
+offset_left = 185.0
+offset_top = 780.0
+offset_right = 712.0
+offset_bottom = 901.0
+text = "Credit"
+label_settings = SubResource("LabelSettings_wosw1")
+
+[node name="TitleBlack" type="Label" parent="." unique_id=998743249]
+offset_left = 186.0
+offset_top = 374.0
+offset_right = 713.0
+offset_bottom = 495.0
+text = "Occlusion"
+label_settings = SubResource("LabelSettings_p6dhs")
