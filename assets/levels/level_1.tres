@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="LevelData" format=3]
+
+[ext_resource type="Script" path="res://scripts/pattern_data.gd" id="1_5wi8b"]
+[ext_resource type="Script" path="res://scripts/piece_data.gd" id="2_048u2"]
+[ext_resource type="Script" path="res://scripts/level_data.gd" id="3_tyjk2"]
+
+[sub_resource type="Resource" id="Resource_xnypg"]
+script = ExtResource("1_5wi8b")
+allowed_states = [[false, false, false], [false, true, true], [false, true, false]]
+
+[sub_resource type="Resource" id="Resource_8kwdi"]
+script = ExtResource("2_048u2")
+id = 1
+shape_cells = [[0, 0], [1, 0], [0, 1]]
+
+[resource]
+script = ExtResource("3_tyjk2")
+level_name = "level_1"
+pieces = Array[ExtResource("2_048u2")]([SubResource("Resource_8kwdi")])
+patterns = Array[ExtResource("1_5wi8b")]([SubResource("Resource_xnypg")])

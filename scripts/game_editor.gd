@@ -351,7 +351,7 @@ func _on_save_level_pressed():
 	ld.level_name = name
 	ld.grid_size = Vector2i(3,3)
 	# pieces: create PieceData resources from current logic.pieces
-	var res_pieces := []
+	var res_pieces : Array[PieceData] = []
 	for p in logic.pieces:
 		var piece_res = PieceData.new()
 		piece_res.id = int(p["id"])
@@ -366,7 +366,7 @@ func _on_save_level_pressed():
 	ld.pieces = res_pieces
 
 	# patterns from logic.level_patterns - clone into LevelData.patterns
-	var pats := []
+	var pats : Array[PatternData] = []
 	for pat in logic.level_patterns:
 		var pcopy = PatternData.new()
 		pcopy.allowed_states = pat.allowed_states.duplicate(true)
@@ -375,8 +375,8 @@ func _on_save_level_pressed():
 
 	# remove 'author' if exists in LevelData resource by design (we won't set it)
 	# save as .tres resource
-	var path = "res://levels/%s.tres" % name
-	var err = ResourceSaver.save(path, ld)
+	var path = "res://assets/levels/%s.tres" % name
+	var err = ResourceSaver.save(ld, path)
 	if err != OK:
 		push_error("Failed to save level resource: %s" % str(err))
 	else:

@@ -3,6 +3,12 @@ class_name GameRenderer
 
 @onready var logic = GameLogic
 
+@export var hover_highlight: Color = Color("#00018d")
+@export var selected_highlight: Color = Color("#0001FF")
+@export var cursor_color: Color = Color("#ff1b8c")
+@export var border_color: Color = Color("#131415")
+
+
 const CELL_SIZE: int = 96
 const GRID_ORIGIN: Vector2 = Vector2(32, 32) # top-left offset
 var cursor: Vector2i = Vector2i(0, 0)
@@ -24,9 +30,9 @@ func _draw_grid():
 		for y in range(logic.grid_h):
 			var pos = GRID_ORIGIN + Vector2(x * CELL_SIZE, y * CELL_SIZE)
 			var rect = Rect2(pos, Vector2(CELL_SIZE, CELL_SIZE))
-			draw_rect(rect, Color(0.15, 0.15, 0.15))
+			draw_rect(rect, Color.BLACK)
 			# border
-			draw_rect(rect, Color(0.3, 0.3, 0.3), false, 2)
+			draw_rect(rect, border_color, false, 2)
 
 # 在 BoardView.gd 中加入 / 替换为以下绘制相关函数
 # Assumes: logic (GameLogic singleton), CELL_SIZE, GRID_ORIGIN exist
@@ -38,6 +44,54 @@ func _invert_color_name(name: String) -> String:
 	else:
 		return "white"
 
+func _draw_cursor_hover_highlight(at_tick: int):
+	# only show when nothing is selected
+	if logic.selected_piece_id != -1:
+		return
+
+	# find topmost piece occupying the cursor cell (respect z-order)
+	var pid = -1
+	var sorted = logic.pieces.duplicate()
+	sorted.sort_custom(_z_desc_local)  # or use your existing _z_desc/_z_desc_local comparator
+	for p in sorted:
+		if logic.piece_occupies_cell(p, int(cursor.x), int(cursor.y), at_tick):
+			pid = p.get("id", -1)
+			break
+	if pid == -1:
+		return
+
+	# find the runtime piece by id
+	var p = null
+	for item in logic.pieces:
+		if item.get("id", null) == pid:
+			p = item
+			break
+	if p == null:
+		return
+
+	# determine occupied cells for this piece (respect dynamic pattern)
+	var occ_cells := []
+	if p.get("is_dynamic", false) and p.get("dynamic_pattern", []).size() > 0:
+		var patterns = p["dynamic_pattern"]
+		var frame = patterns[at_tick % patterns.size()]
+		for c in frame:
+			occ_cells.append(Vector2(int(c[0]), int(c[1])))
+	else:
+		for c in p.get("shape_cells", []):
+			occ_cells.append(Vector2(int(c[0]), int(c[1])))
+
+	# draw highlight per occupied cell (same style as selected highlight)
+	var border_width := 4.0
+	var highlight_color := hover_highlight # same orange as selection highlight
+	for cell in occ_cells:
+		var x = int(cell.x)
+		var y = int(cell.y)
+		if x < 0 or x >= logic.grid_w or y < 0 or y >= logic.grid_h:
+			continue
+		var pos = GRID_ORIGIN + Vector2(x * CELL_SIZE, y * CELL_SIZE)
+		var rect = Rect2(pos, Vector2(CELL_SIZE, CELL_SIZE))
+		draw_rect(rect, highlight_color, false, border_width)
+		
 func compute_visible_state_from_pieces(pieces_array: Array, at_tick: int) -> Dictionary:
 	var grid = []
 	var owner = []
@@ -70,6 +124,10 @@ func compute_visible_state_from_pieces(pieces_array: Array, at_tick: int) -> Dic
 					else:
 						continue
 				# occupies true
+				if p.get("is_mask", false):
+					var below_color = _find_below_color_local(sorted, i, x, y, at_tick)["color"] # or return string
+					cell["fill_color"] = below_color
+					break
 				if p.get("is_inverter", false):
 					# get both color and owner from below
 					var below = _find_below_color_local(sorted, i, x, y, at_tick)
@@ -80,6 +138,7 @@ func compute_visible_state_from_pieces(pieces_array: Array, at_tick: int) -> Dic
 					# set owner to the below owner (inverter itself is not the color source)
 					owner[x][y] = below_owner
 					break
+				# inside compute_visible_state_from_pieces loop, when p occupies:
 				else:
 					# normal piece: it is the source
 					cell["fill_color"] = p.get("color", "black")
@@ -229,10 +288,10 @@ func _draw_layers(at_tick: int):
 					draw_rect(rect, Color.BLACK)
 				else:
 					# nothing visible -> draw background
-					draw_rect(rect, Color(0.08, 0.08, 0.08))
+					draw_rect(rect, Color.BLACK)
 
 			# border
-			draw_rect(rect, Color(0.3, 0.3, 0.3), false, 2)
+			draw_rect(rect, border_color, false, 2)
 
 # BoardView.gd — helper to draw highlight around selected piece
 # Place this function in the script and call it from _draw() after _draw_layers(...)
@@ -266,7 +325,7 @@ func _draw_selected_highlight(at_tick: int):
 
 	# draw highlight per occupied cell (on top)
 	var border_width := 4.0
-	var highlight_color := Color(1.0, 0.6, 0.0, 1.0) # orange
+	var highlight_color := selected_highlight # orange
 	for cell in occ_cells:
 		var x = int(cell.x)
 		var y = int(cell.y)
@@ -290,6 +349,7 @@ func _draw():
 	_draw_z_overlays(logic.tick, 4)
 	_draw_goal_overlay()
 	_draw_selected_highlight(logic.tick)
+	_draw_cursor_hover_highlight(logic.tick)
 	_draw_cursor()
 	# status text
 	#draw_string(get_font("font") if has_font("font") else get_default_font(), Vector2(10, 10), "Tick: %d" % logic.tick, Color(1,1,1))
@@ -298,7 +358,7 @@ func _draw():
 func _draw_cursor():
 	var pos = GRID_ORIGIN + Vector2(cursor.x * CELL_SIZE, cursor.y * CELL_SIZE)
 	var rect = Rect2(pos, Vector2(CELL_SIZE, CELL_SIZE))
-	draw_rect(rect, Color(0.0, 0.0, 1.0, 1.0), false, 3)
+	draw_rect(rect, cursor_color, false, 3)
 
 func _draw_goal_overlay():
 	# require patterns

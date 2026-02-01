@@ -7,4 +7,5 @@
 script = ExtResource("1_yqjtg")
 
 [node name="GameRenderer" type="Node2D" parent="." unique_id=710285525]
+position = Vector2(753, 298)
 script = ExtResource("2_yqjtg")

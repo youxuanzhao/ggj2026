@@ -183,7 +183,7 @@ func compute_visible_state_at(at_tick: int) -> Array:
 		var col = []
 		for y in range(grid_h):
 			col.append({
-				"fill_color": "black",         # "white"/"black"/null
+				"fill_color": null,         # "white"/"black"/null
 				"stroke_color": null,
 				"is_black_due_to_mask": false
 			})
@@ -199,20 +199,34 @@ func compute_visible_state_at(at_tick: int) -> Array:
 				var p = sorted[i]
 				var occupies = piece_occupies_cell(p, x, y, at_tick)
 				if not occupies:
+					# mask that does not cover -> black and stop
 					if p.get("is_mask", false):
 						cell["is_black_due_to_mask"] = true
 						break
 					else:
 						continue
-				# occupies true
+
+				# p occupies this cell
+				# if p is mask: reveal below color (don't use p's own color as source)
+				if p.get("is_mask", false):
+					# find the visible color & owner below this mask layer
+					var below = _find_below_color(sorted, i, x, y, at_tick)
+					# below may return "black" if nothing below or masked below
+					cell["fill_color"] = below
+					# is_black_due_to_mask remains false because mask here reveals rather than blackens
+					break
+
+				# if p is inverter: use inverted below color (owner resolution handled in helper)
 				if p.get("is_inverter", false):
 					var below_color = _find_below_color(sorted, i, x, y, at_tick)
 					cell["fill_color"] = _invert_color(below_color)
 					break
-				else:
-					cell["fill_color"] = p.get("color", "black")
-					break
+
+				# normal piece supplies its own color
+				cell["fill_color"] = p.get("color", "black")
+				break
 	return grid
+
 
 # convenience wrapper for current tick
 func compute_visible_state() -> Array:
@@ -222,21 +236,29 @@ func _z_desc(a, b) -> int:
 	return b["z_order"] < a["z_order"]
 
 # find the visible color below index start_i in sorted array (with tick)
+# returns "white" or "black" representing first visible color below index start_i
 func _find_below_color(sorted: Array, start_i: int, x: int, y: int, at_tick: int) -> String:
 	for j in range(start_i + 1, sorted.size()):
 		var q = sorted[j]
 		var occupies = piece_occupies_cell(q, x, y, at_tick)
 		if not occupies:
 			if q.get("is_mask", false):
+				# a mask below that does NOT cover this cell forces black and stops
 				return "black"
 			else:
 				continue
-		# occupies true
+		# q occupies
 		if q.get("is_inverter", false):
+			# inverter: invert whatever is below it
 			return _invert_color(_find_below_color(sorted, j, x, y, at_tick))
-		else:
-			return q.get("color", "black")
+		if q.get("is_mask", false):
+			# q is a mask that covers -> reveal below q recursively
+			return _find_below_color(sorted, j, x, y, at_tick)
+		# normal piece: return its color
+		return q.get("color", "black")
+	# nothing below => black
 	return "black"
+
 
 func _invert_color(c: String) -> String:
 	if c == "white":
