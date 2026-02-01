@@ -1,0 +1,90 @@
+[gd_scene format=3 uid="uid://c0wg5awajg8cp"]
+
+[ext_resource type="Material" uid="uid://dd4nayjnqv5vy" path="res://assets/shaders/crt_effect.tres" id="1_kmqx5"]
+[ext_resource type="Script" uid="uid://qpamihxd1blq" path="res://scripts/credit.gd" id="1_st0h4"]
+[ext_resource type="FontFile" uid="uid://cani70bdd6xyd" path="res://assets/fonts/JetBrainsMono-Regular.ttf" id="2_5egdn"]
+[ext_resource type="AudioStream" uid="uid://dc4b25sdfu4kb" path="res://assets/audio/02 幻聽.mp3" id="4_32mfc"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_st0h4"]
+font = ExtResource("2_5egdn")
+font_size = 76
+
+[node name="Credit" type="Node2D" unique_id=818747553]
+script = ExtResource("1_st0h4")
+
+[node name="Label" type="Label" parent="." unique_id=1739274430]
+offset_left = 2.0
+offset_right = 1655.0
+offset_bottom = 1197.0
+text = "Design: Loka (趙又萱)
+Programming: Loka (趙又萱)
+Art: Loka (趙又萱)
+Music:
+序·玉樓春·雨·臨江仙    窦唯 1999
+灕江水     窦唯 1999
+幻聽     窦唯 1999
+Sound: broumbroum,
+BryanSaraiva (freesound.org)
+"
+label_settings = SubResource("LabelSettings_st0h4")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=932791377]
+
+[node name="MenuEffect" type="ColorRect" parent="CanvasLayer" unique_id=1350722893]
+offset_right = 1920.0
+offset_bottom = 1080.0
+color = Color(0, 0, 0, 0.47058824)
+metadata/_edit_use_anchors_ = true
+
+[node name="Menu" type="VBoxContainer" parent="CanvasLayer" unique_id=1682389829]
+anchors_preset = 13
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -286.0
+offset_right = 292.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="BackBtn" type="Button" parent="CanvasLayer/Menu" unique_id=292126938]
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_5egdn")
+text = "Back to game"
+
+[node name="HelpBtn" type="Button" parent="CanvasLayer/Menu" unique_id=863474250]
+visible = false
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_5egdn")
+text = "Help
+"
+
+[node name="SettingBtn" type="Button" parent="CanvasLayer/Menu" unique_id=388962126]
+visible = false
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_5egdn")
+text = "Settings
+"
+
+[node name="ExitBtn" type="Button" parent="CanvasLayer/Menu" unique_id=2126079317]
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("2_5egdn")
+text = "Quit to menu
+"
+
+[node name="ColorRect" type="ColorRect" parent="CanvasLayer" unique_id=1759709093]
+material = ExtResource("1_kmqx5")
+offset_right = 1920.0
+offset_bottom = 1080.0
+mouse_filter = 2
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=1597546623]
+stream = ExtResource("4_32mfc")
+volume_db = -20.0
+autoplay = true
+parameters/looping = true

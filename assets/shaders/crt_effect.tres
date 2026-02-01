@@ -4,7 +4,7 @@
 
 [resource]
 shader = ExtResource("1_0sbyq")
-shader_parameter/resolution = Vector2(1920, 1080)
+shader_parameter/resolution = Vector2(1280, 720)
 shader_parameter/scan_line_amount = 0.70000003325
 shader_parameter/warp_amount = 0.350000016625
 shader_parameter/vignette_amount = 0.5

@@ -72,6 +72,8 @@ func _ready():
 	export_level_btn.pressed.connect(_on_export_level_btn_pressed)
 	back_btn.pressed.connect(_on_back_btn_pressed)
 	exit_btn.pressed.connect(_on_exit_btn_pressed)
+	logic.pieces.clear()
+	logic.level_patterns.clear()
 	_init_builder_grid()
 	_init_goal_grid()
 	_connect_ui()
@@ -363,41 +365,48 @@ func _on_save_level_pressed():
 	if name == "":
 		push_warning("Please enter level name")
 		return
-	# create LevelData resource
+
+	# Create LevelData in-memory (not written to disk)
 	var ld = LevelData.new()
 	ld.level_name = name
-	ld.grid_size = Vector2i(3,3)
+	ld.grid_size = Vector2i(logic.grid_w, logic.grid_h)
+
 	# pieces: create PieceData resources from current logic.pieces
-	var res_pieces : Array[PieceData] = []
+	var res_pieces : Array[PieceData]= []
 	for p in logic.pieces:
 		var piece_res = PieceData.new()
 		piece_res.id = int(p["id"])
 		piece_res.color = p["color"]
 		piece_res.z_order = int(p["z_order"])
+		# deep copy arrays to avoid sharing references
 		piece_res.shape_cells = p["shape_cells"].duplicate(true)
-		piece_res.is_mask = bool(p["is_mask"])
-		piece_res.is_inverter = bool(p["is_inverter"])
-		piece_res.is_dynamic = bool(p["is_dynamic"])
-		piece_res.dynamic_pattern = p["dynamic_pattern"].duplicate(true)
+		piece_res.is_mask = bool(p.get("is_mask", false))
+		piece_res.is_inverter = bool(p.get("is_inverter", false))
+		piece_res.is_dynamic = bool(p.get("is_dynamic", false))
+		piece_res.dynamic_pattern = p.get("dynamic_pattern", []).duplicate(true)
 		res_pieces.append(piece_res)
 	ld.pieces = res_pieces
 
 	# patterns from logic.level_patterns - clone into LevelData.patterns
 	var pats : Array[PatternData] = []
 	for pat in logic.level_patterns:
+		if pat == null:
+			continue
 		var pcopy = PatternData.new()
+		# ensure allowed_states is duplicated (3x3)
 		pcopy.allowed_states = pat.allowed_states.duplicate(true)
 		pats.append(pcopy)
 	ld.patterns = pats
 
-	# remove 'author' if exists in LevelData resource by design (we won't set it)
-	# save as .tres resource
-	var path = "res://assets/levels/%s.tres" % name
-	var err = ResourceSaver.save(ld, path)
-	if err != OK:
-		push_error("Failed to save level resource: %s" % str(err))
+	# Add to GameLogic.custom_levels via provided API
+	var new_index = logic.add_custom_level(ld)
+	if new_index >= 0:
+		print("Saved custom level into GameLogic.custom_levels at index %d" % new_index)
+		# Optionally: notify UI to add new item to CustomLevelSelector
+		# e.g., call a function in GameManager or emit a custom signal:
+		# emit_signal("custom_level_added", new_index, name)
 	else:
-		print("Saved level to %s" % path)
+		push_error("Failed to save custom level into GameLogic")
 
 func _on_reset_level_pressed():
 	_clear_builder()

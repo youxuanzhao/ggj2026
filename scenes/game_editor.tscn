@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://dvgpta3lctfil" path="res://scripts/game_renderer.gd" id="1_3qtki"]
 [ext_resource type="Script" uid="uid://1lxai4vn71o" path="res://scripts/game_editor.gd" id="1_gsv6k"]
 [ext_resource type="FontFile" uid="uid://cani70bdd6xyd" path="res://assets/fonts/JetBrainsMono-Regular.ttf" id="3_4xjey"]
+[ext_resource type="AudioStream" uid="uid://cshbmv7bas1hl" path="res://assets/audio/10 灕江水.mp3" id="4_q8b80"]
 
 [sub_resource type="Shader" id="Shader_76lr1"]
 code = "shader_type canvas_item;
@@ -44,7 +45,7 @@ void fragment() {
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_q8b80"]
 shader = SubResource("Shader_76lr1")
-shader_parameter/resolution = Vector2(1920, 1080)
+shader_parameter/resolution = Vector2(1280, 720)
 shader_parameter/scan_line_amount = 0.70000003325
 shader_parameter/warp_amount = 0.10000000475
 shader_parameter/vignette_amount = 0.5
@@ -220,6 +221,7 @@ theme_override_fonts/font = ExtResource("3_4xjey")
 text = "Back to game"
 
 [node name="HelpBtn" type="Button" parent="CanvasLayer/Menu" unique_id=1222993043]
+visible = false
 custom_minimum_size = Vector2(0, 60)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("3_4xjey")
@@ -227,6 +229,7 @@ text = "Help
 "
 
 [node name="SettingBtn" type="Button" parent="CanvasLayer/Menu" unique_id=2129142472]
+visible = false
 custom_minimum_size = Vector2(0, 60)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("3_4xjey")
@@ -245,3 +248,9 @@ material = SubResource("ShaderMaterial_q8b80")
 offset_right = 1920.0
 offset_bottom = 1080.0
 mouse_filter = 2
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=1994335667]
+stream = ExtResource("4_q8b80")
+volume_db = -20.0
+autoplay = true
+parameters/looping = true

@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://djekv1w1i4igj"
+path="res://.godot/imported/01 序.玉樓春.雨.臨江仙.mp3-1f2b751e3fd770899ca959bf788d67b6.mp3str"
+
+[deps]
+
+source_file="res://assets/audio/01 序.玉樓春.雨.臨江仙.mp3"
+dest_files=["res://.godot/imported/01 序.玉樓春.雨.臨江仙.mp3-1f2b751e3fd770899ca959bf788d67b6.mp3str"]
+
+[params]
+
+loop=true
+loop_offset=0.0
+bpm=0.0
+beat_count=0
+bar_beats=4

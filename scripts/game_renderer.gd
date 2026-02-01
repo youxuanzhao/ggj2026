@@ -9,7 +9,7 @@ class_name GameRenderer
 @export var selected_highlight: Color = Color("#0001FF")
 @export var cursor_color: Color = Color("#ff1b8c")
 @export var border_color: Color = Color("#131415")
-
+@export var disable_control: bool = false
 
 const CELL_SIZE: int = 96
 const GRID_ORIGIN: Vector2 = Vector2(32, 32) # top-left offset
@@ -364,9 +364,10 @@ func _draw():
 	# goal overlay can be drawn on top if you want it visible (optional)
 	_draw_z_overlays(logic.tick, 4)
 	_draw_goal_overlay()
-	_draw_selected_highlight(logic.tick)
-	_draw_cursor_hover_highlight(logic.tick)
-	if logic.selected_piece_id == -1:
+	if !disable_control:
+		_draw_selected_highlight(logic.tick)
+		_draw_cursor_hover_highlight(logic.tick)
+	if logic.selected_piece_id == -1 and !disable_control:
 		_draw_cursor()
 	# status text
 	#draw_string(get_font("font") if has_font("font") else get_default_font(), Vector2(10, 10), "Tick: %d" % logic.tick, Color(1,1,1))
@@ -444,33 +445,39 @@ func _draw_goal_overlay():
 
 # Replace previous _input/_unhandled_input with this block
 func _process(_delta):
+	if !disable_control:
 	# directional input
-	if Input.is_action_just_pressed("left"):
-		_handle_left()
-	if Input.is_action_just_pressed("right"):
-		_handle_right()
-	if Input.is_action_just_pressed("up"):
-		_handle_up()
-	if Input.is_action_just_pressed("down"):
-		_handle_down()
+		if Input.is_action_just_pressed("left"):
+			_handle_left()
+		if Input.is_action_just_pressed("right"):
+			_handle_right()
+		if Input.is_action_just_pressed("up"):
+			_handle_up()
+		if Input.is_action_just_pressed("down"):
+			_handle_down()
 
-	# z / x for z-order
-	if Input.is_action_just_pressed("z"):
-		logic.change_z_selected(1)
-	if Input.is_action_just_pressed("x"):
-		logic.change_z_selected(-1)
-	if Input.is_action_just_pressed("c"):
-		fill_rect = !fill_rect
+		# z / x for z-order
+		if Input.is_action_just_pressed("z"):
+			logic.change_z_selected(1)
+		if Input.is_action_just_pressed("x"):
+			logic.change_z_selected(-1)
+		if Input.is_action_just_pressed("c"):
+			fill_rect = !fill_rect
+		if Input.is_action_just_pressed("v"):
+			logic.undo()
+		if Input.is_action_just_pressed("b"):
+			logic.redo()
 
-	# space for select / confirm
-	if Input.is_action_just_pressed("space"):
-		_handle_space()
+		# space for select / confirm
+		if Input.is_action_just_pressed("space"):
+			_handle_space()
 
 # Individual handlers for clarity & reuse
 func _handle_left():
 	if logic.selected_piece_id == -1:
 		cursor.x = max(0, cursor.x - 1)
 		queue_redraw()
+		ClickPlay.play_click()
 	else:
 		logic.move_selected(-1, 0)
 
@@ -478,6 +485,7 @@ func _handle_right():
 	if logic.selected_piece_id == -1:
 		cursor.x = min(logic.grid_w - 1, cursor.x + 1)
 		queue_redraw()
+		ClickPlay.play_click()
 	else:
 		logic.move_selected(1, 0)
 
@@ -485,6 +493,7 @@ func _handle_up():
 	if logic.selected_piece_id == -1:
 		cursor.y = max(0, cursor.y - 1)
 		queue_redraw()
+		ClickPlay.play_click()
 	else:
 		logic.move_selected(0, -1)
 
@@ -492,10 +501,12 @@ func _handle_down():
 	if logic.selected_piece_id == -1:
 		cursor.y = min(logic.grid_h - 1, cursor.y + 1)
 		queue_redraw()
+		ClickPlay.play_click()
 	else:
 		logic.move_selected(0, 1)
 
 func _handle_space():
+	ClickPlay.play_click()
 	if logic.selected_piece_id == -1:
 		var pid = logic.select_piece_at(cursor.x, cursor.y)
 		if pid != -1:
@@ -505,16 +516,16 @@ func _handle_space():
 		holding_piece_id = -1
 
 
-func _on_space_pressed():
-	# if nothing selected, select piece at cursor (if any)
-	if logic.selected_piece_id == -1:
-		var pid = logic.select_piece_at(cursor.x, cursor.y)
-		if pid != -1:
-			holding_piece_id = pid
-	else:
-		# if selected, confirm (drop)
-		logic.confirm_selection()
-		holding_piece_id = -1
+#func _on_space_pressed():
+	## if nothing selected, select piece at cursor (if any)
+	#if logic.selected_piece_id == -1:
+		#var pid = logic.select_piece_at(cursor.x, cursor.y)
+		#if pid != -1:
+			#holding_piece_id = pid
+	#else:
+		## if selected, confirm (drop)
+		#logic.confirm_selection()
+		#holding_piece_id = -1
 
 # helper to find runtime piece index by id (duplicate of logic's)
 func _find_piece_index_by_id(pid: int) -> int:

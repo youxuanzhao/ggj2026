@@ -4,6 +4,8 @@
 [ext_resource type="Script" uid="uid://bhx6c63fy8q3u" path="res://scripts/title.gd" id="1_p6dhs"]
 [ext_resource type="FontFile" uid="uid://cani70bdd6xyd" path="res://assets/fonts/JetBrainsMono-Regular.ttf" id="3_pyl7j"]
 [ext_resource type="Material" uid="uid://dd4nayjnqv5vy" path="res://assets/shaders/crt_effect.tres" id="4_pyl7j"]
+[ext_resource type="AudioStream" uid="uid://djekv1w1i4igj" path="res://assets/audio/01 序.玉樓春.雨.臨江仙.mp3" id="5_b3w7a"]
+[ext_resource type="Script" uid="uid://dvgpta3lctfil" path="res://scripts/game_renderer.gd" id="6_4rr2b"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_p6dhs"]
 font = ExtResource("3_pyl7j")
@@ -55,7 +57,7 @@ label_settings = SubResource("LabelSettings_wosw1")
 
 [node name="Option3" type="Label" parent="VBoxContainer" unique_id=1844916541]
 layout_mode = 2
-text = "Credit"
+text = "Credits"
 label_settings = SubResource("LabelSettings_wosw1")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1191809493]
@@ -71,3 +73,16 @@ material = ExtResource("4_pyl7j")
 offset_right = 1920.0
 offset_bottom = 1080.0
 mouse_filter = 2
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=1383862262]
+stream = ExtResource("5_b3w7a")
+volume_db = -20.0
+autoplay = true
+parameters/looping = true
+
+[node name="GameRenderer" type="Node2D" parent="." unique_id=737630266]
+position = Vector2(1066, 256)
+scale = Vector2(2, 2)
+script = ExtResource("6_4rr2b")
+disable_control = true
+metadata/_custom_type_script = "uid://dvgpta3lctfil"

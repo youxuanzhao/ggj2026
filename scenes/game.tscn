@@ -5,6 +5,7 @@
 [ext_resource type="Material" uid="uid://dd4nayjnqv5vy" path="res://assets/shaders/crt_effect.tres" id="3_lnu2h"]
 [ext_resource type="FontFile" uid="uid://cani70bdd6xyd" path="res://assets/fonts/JetBrainsMono-Regular.ttf" id="4_lbhrr"]
 [ext_resource type="StyleBox" uid="uid://txh3gl3pbf7g" path="res://assets/shaders/new_style_box_flat.tres" id="5_iywne"]
+[ext_resource type="AudioStream" uid="uid://cshbmv7bas1hl" path="res://assets/audio/10 灕江水.mp3" id="6_p57ef"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_iywne"]
 font = ExtResource("4_lbhrr")
@@ -50,6 +51,7 @@ theme_override_fonts/font = ExtResource("4_lbhrr")
 text = "Back to game"
 
 [node name="HelpBtn" type="Button" parent="CanvasLayer/Menu" unique_id=379372987]
+visible = false
 custom_minimum_size = Vector2(0, 60)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("4_lbhrr")
@@ -57,6 +59,7 @@ text = "Help
 "
 
 [node name="SettingBtn" type="Button" parent="CanvasLayer/Menu" unique_id=723895912]
+visible = false
 custom_minimum_size = Vector2(0, 60)
 layout_mode = 2
 theme_override_fonts/font = ExtResource("4_lbhrr")
@@ -97,3 +100,29 @@ allow_search = false
 auto_height = true
 item_count = 1
 item_0/text = "level_1"
+
+[node name="CustomLevelSelector" type="VBoxContainer" parent="CanvasLayer" unique_id=1042543083]
+custom_minimum_size = Vector2(200, 0)
+offset_left = 318.0
+offset_top = 37.0
+offset_right = 567.0
+offset_bottom = 110.0
+
+[node name="Label" type="Label" parent="CanvasLayer/CustomLevelSelector" unique_id=99170285]
+layout_mode = 2
+text = "Custom Levels"
+label_settings = SubResource("LabelSettings_iywne")
+horizontal_alignment = 1
+
+[node name="ItemList" type="ItemList" parent="CanvasLayer/CustomLevelSelector" unique_id=1222355370]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_lbhrr")
+theme_override_styles/panel = ExtResource("5_iywne")
+allow_search = false
+auto_height = true
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=2120278318]
+stream = ExtResource("6_p57ef")
+volume_db = -20.0
+autoplay = true
+parameters/looping = true

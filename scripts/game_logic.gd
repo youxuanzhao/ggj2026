@@ -3,11 +3,14 @@ extends Node
 signal state_changed
 signal next_level
 
+var game_progress: int = 0
+
 # runtime model
 var pieces : Array = []            # 每项为 Dictionary 的运行时副本（基于 PieceData）
 var tick: int = 0
 var grid_w: int = 3
 var grid_h: int = 3
+var custom_levels: Array[LevelData] = []
 
 # selection / undo
 var selected_piece_id: int = -1
@@ -382,6 +385,7 @@ func move_selected(dx: int, dy: int) -> bool:
 	# commit back
 	pieces[idx] = p
 	emit_signal("state_changed")
+	ClickPlay.play_click()
 	return true
 
 
@@ -563,4 +567,29 @@ func is_goal_satisfied() -> bool:
 					return false
 				if (not want_white) and actual_color != "black":
 					return false
+	return true
+
+func add_custom_level(ld: LevelData) -> int:
+	if ld == null:
+		push_error("add_custom_level: provided LevelData is null")
+		return -1
+	# Optionally clone or normalize ld here if needed.
+	custom_levels.append(ld)
+	print("added")
+	# notify views that available levels changed (optional)
+	emit_signal("state_changed")
+	return custom_levels.size() - 1
+
+# Load a custom level by index (from custom_levels).
+# Returns true on success, false on failure.
+func load_custom_level(idx: int) -> bool:
+	if idx < 0 or idx >= custom_levels.size():
+		push_error("load_custom_level: index out of range: %d" % idx)
+		return false
+	var ld : LevelData = custom_levels[idx]
+	if ld == null:
+		push_error("load_custom_level: stored LevelData is null at index %d" % idx)
+		return false
+	# reuse existing loader to keep behavior consistent
+	load_level_from_resource(ld)
 	return true

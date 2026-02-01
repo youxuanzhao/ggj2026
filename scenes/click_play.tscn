@@ -1,0 +1,16 @@
+[gd_scene format=3 uid="uid://cwhtk25txerdv"]
+
+[ext_resource type="Script" uid="uid://cf3ori177etib" path="res://scripts/click_play.gd" id="1_du8lw"]
+[ext_resource type="AudioStream" uid="uid://c32kvinqnw07v" path="res://assets/audio/820353__bryansaraiva__typewriter-key-press-06.wav" id="1_j6pau"]
+[ext_resource type="AudioStream" uid="uid://r1bydkgxqwsm" path="res://assets/audio/50560__broumbroum__sf3-sfx-menu-select-r.wav" id="3_i5k3f"]
+
+[node name="Node" type="Node" unique_id=235451333]
+script = ExtResource("1_du8lw")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="." unique_id=1729228907]
+stream = ExtResource("1_j6pau")
+volume_db = -20.0
+pitch_scale = 0.7
+
+[node name="AudioStreamPlayer2" type="AudioStreamPlayer" parent="." unique_id=470943692]
+stream = ExtResource("3_i5k3f")
