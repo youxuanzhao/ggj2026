@@ -1,0 +1,7 @@
+[gd_resource type="Resource" script_class="Progress" format=3 uid="uid://c6at8jbpme305"]
+
+[ext_resource type="Script" uid="uid://dlsa3f7bqa8t1" path="res://scripts/progress.gd" id="1_mraqr"]
+
+[resource]
+script = ExtResource("1_mraqr")
+metadata/_custom_type_script = "uid://dlsa3f7bqa8t1"

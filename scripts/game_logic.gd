@@ -1,6 +1,7 @@
 extends Node
 
 signal state_changed
+signal next_level
 
 # runtime model
 var pieces : Array = []            # 每项为 Dictionary 的运行时副本（基于 PieceData）
@@ -41,6 +42,7 @@ func _ready():
 # ---------------------
 func load_level_from_resource(res: Resource) -> void:
 	# LevelData expected
+	overall_goal_satisfied = false
 	pieces.clear()
 	tick = 0
 	selected_piece_id = -1
@@ -520,7 +522,11 @@ func _update_goal_status() -> void:
 
 	# if all frames ok and previously not satisfied, print once
 	if all_ok and not overall_goal_satisfied:
+		emit_signal("next_level")
 		print("Goal satisfied")
+		all_ok = false
+		overall_goal_satisfied = false
+		
 	overall_goal_satisfied = all_ok
 
 	# notify views

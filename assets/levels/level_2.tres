@@ -1,0 +1,27 @@
+[gd_resource type="Resource" script_class="LevelData" format=3]
+
+[ext_resource type="Script" path="res://scripts/pattern_data.gd" id="1_uphqw"]
+[ext_resource type="Script" path="res://scripts/piece_data.gd" id="2_3v8wy"]
+[ext_resource type="Script" path="res://scripts/level_data.gd" id="3_03iq2"]
+
+[sub_resource type="Resource" id="Resource_2xuuw"]
+script = ExtResource("1_uphqw")
+allowed_states = [[false, false, true], [false, false, false], [false, false, true]]
+
+[sub_resource type="Resource" id="Resource_w2sq0"]
+script = ExtResource("2_3v8wy")
+id = 1
+color = "black"
+shape_cells = [[0, 0], [0, 1], [1, 1], [0, 2]]
+
+[sub_resource type="Resource" id="Resource_ha1t3"]
+script = ExtResource("2_3v8wy")
+id = 2
+shape_cells = [[2, 0], [1, 1], [2, 1], [2, 2]]
+z_order = 1
+
+[resource]
+script = ExtResource("3_03iq2")
+level_name = "level_2"
+pieces = Array[ExtResource("2_3v8wy")]([SubResource("Resource_w2sq0"), SubResource("Resource_ha1t3")])
+patterns = Array[ExtResource("1_uphqw")]([SubResource("Resource_2xuuw")])

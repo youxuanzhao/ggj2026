@@ -4,6 +4,8 @@ class_name GameRenderer
 @onready var logic = GameLogic
 
 @export var hover_highlight: Color = Color("#00018d")
+@export var inverter_highlight: Color = Color.ORANGE
+@export var mask_highlight: Color = Color.RED
 @export var selected_highlight: Color = Color("#0001FF")
 @export var cursor_color: Color = Color("#ff1b8c")
 @export var border_color: Color = Color("#131415")
@@ -13,6 +15,8 @@ const CELL_SIZE: int = 96
 const GRID_ORIGIN: Vector2 = Vector2(32, 32) # top-left offset
 var cursor: Vector2i = Vector2i(0, 0)
 var holding_piece_id: int = -1
+var fill_rect: bool = true
+var text_font: Font = preload("res://assets/fonts/JetBrainsMono-Regular.ttf")
 
 func _ready():
 	logic.connect("state_changed", Callable(self, "_on_state_changed"))
@@ -83,6 +87,12 @@ func _draw_cursor_hover_highlight(at_tick: int):
 	# draw highlight per occupied cell (same style as selected highlight)
 	var border_width := 4.0
 	var highlight_color := hover_highlight # same orange as selection highlight
+	if p.get("is_inverter", true):
+		highlight_color = inverter_highlight
+		
+	elif p.get("is_mask", true):
+		highlight_color = mask_highlight
+	
 	for cell in occ_cells:
 		var x = int(cell.x)
 		var y = int(cell.y)
@@ -288,7 +298,7 @@ func _draw_layers(at_tick: int):
 					draw_rect(rect, Color.BLACK)
 				else:
 					# nothing visible -> draw background
-					draw_rect(rect, Color.BLACK)
+					draw_rect(rect, border_color)
 
 			# border
 			draw_rect(rect, border_color, false, 2)
@@ -324,8 +334,12 @@ func _draw_selected_highlight(at_tick: int):
 			occ_cells.append(Vector2(int(c[0]), int(c[1])))
 
 	# draw highlight per occupied cell (on top)
-	var border_width := 4.0
+	var border_width := 4.0	
 	var highlight_color := selected_highlight # orange
+	if p.get("is_mask", true):
+		highlight_color = mask_highlight
+	if p.get("is_inverter", true):
+		highlight_color = inverter_highlight
 	for cell in occ_cells:
 		var x = int(cell.x)
 		var y = int(cell.y)
@@ -333,8 +347,10 @@ func _draw_selected_highlight(at_tick: int):
 		if x < 0 or x >= logic.grid_w or y < 0 or y >= logic.grid_h:
 			continue
 		var pos = GRID_ORIGIN + Vector2(x * CELL_SIZE, y * CELL_SIZE)
+		var text_pos = GRID_ORIGIN + Vector2(x * CELL_SIZE + CELL_SIZE/2, y * CELL_SIZE + CELL_SIZE/2)
 		var rect = Rect2(pos, Vector2(CELL_SIZE, CELL_SIZE))
-		draw_rect(rect, highlight_color, false, border_width)
+		draw_rect(rect, highlight_color, fill_rect, border_width)
+		draw_string(text_font,text_pos,str(p.get("z_order")))
 
 # sorting helper: z ascending for draw
 func _z_asc_for_draw(a, b) -> int:
@@ -350,7 +366,8 @@ func _draw():
 	_draw_goal_overlay()
 	_draw_selected_highlight(logic.tick)
 	_draw_cursor_hover_highlight(logic.tick)
-	_draw_cursor()
+	if logic.selected_piece_id == -1:
+		_draw_cursor()
 	# status text
 	#draw_string(get_font("font") if has_font("font") else get_default_font(), Vector2(10, 10), "Tick: %d" % logic.tick, Color(1,1,1))
 
@@ -442,6 +459,8 @@ func _process(_delta):
 		logic.change_z_selected(1)
 	if Input.is_action_just_pressed("x"):
 		logic.change_z_selected(-1)
+	if Input.is_action_just_pressed("c"):
+		fill_rect = !fill_rect
 
 	# space for select / confirm
 	if Input.is_action_just_pressed("space"):

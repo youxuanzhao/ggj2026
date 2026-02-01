@@ -1,0 +1,42 @@
+[gd_resource type="Resource" script_class="LevelData" format=3 uid="uid://se3haw0t0spi"]
+
+[ext_resource type="Script" uid="uid://c6s3gxixlxerl" path="res://scripts/pattern_data.gd" id="1_frmpk"]
+[ext_resource type="Script" uid="uid://dqaom3e0tkdro" path="res://scripts/piece_data.gd" id="2_joy63"]
+[ext_resource type="Script" uid="uid://g0oh2qswljlj" path="res://scripts/level_data.gd" id="3_8igti"]
+
+[sub_resource type="Resource" id="Resource_hk2x3"]
+script = ExtResource("1_frmpk")
+allowed_states = [[false, false, true], [false, true, true], [false, false, true]]
+
+[sub_resource type="Resource" id="Resource_topd1"]
+script = ExtResource("1_frmpk")
+allowed_states = [[false, false, true], [true, true, false], [false, false, true]]
+
+[sub_resource type="Resource" id="Resource_4djtu"]
+script = ExtResource("2_joy63")
+id = 1
+shape_cells = [[2, 2]]
+z_order = 2
+is_dynamic = true
+dynamic_pattern = [[[0, 2]], [[2, 2]]]
+
+[sub_resource type="Resource" id="Resource_snnqs"]
+script = ExtResource("2_joy63")
+id = 2
+color = "black"
+shape_cells = [[1, 2]]
+is_dynamic = true
+dynamic_pattern = [[[1, 0]], [[1, 2]]]
+
+[sub_resource type="Resource" id="Resource_sbgk7"]
+script = ExtResource("2_joy63")
+id = 3
+shape_cells = [[1, 0], [0, 1], [1, 2]]
+z_order = 1
+is_inverter = true
+
+[resource]
+script = ExtResource("3_8igti")
+level_name = "level_9"
+pieces = Array[ExtResource("2_joy63")]([SubResource("Resource_4djtu"), SubResource("Resource_snnqs"), SubResource("Resource_sbgk7")])
+patterns = Array[ExtResource("1_frmpk")]([SubResource("Resource_hk2x3"), SubResource("Resource_topd1")])

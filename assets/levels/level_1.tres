@@ -1,8 +1,8 @@
-[gd_resource type="Resource" script_class="LevelData" format=3]
+[gd_resource type="Resource" script_class="LevelData" format=3 uid="uid://dq4pvowa0hkv"]
 
-[ext_resource type="Script" path="res://scripts/pattern_data.gd" id="1_5wi8b"]
-[ext_resource type="Script" path="res://scripts/piece_data.gd" id="2_048u2"]
-[ext_resource type="Script" path="res://scripts/level_data.gd" id="3_tyjk2"]
+[ext_resource type="Script" uid="uid://c6s3gxixlxerl" path="res://scripts/pattern_data.gd" id="1_5wi8b"]
+[ext_resource type="Script" uid="uid://dqaom3e0tkdro" path="res://scripts/piece_data.gd" id="2_048u2"]
+[ext_resource type="Script" uid="uid://g0oh2qswljlj" path="res://scripts/level_data.gd" id="3_tyjk2"]
 
 [sub_resource type="Resource" id="Resource_xnypg"]
 script = ExtResource("1_5wi8b")

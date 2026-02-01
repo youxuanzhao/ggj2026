@@ -5,6 +5,8 @@ extends Node2D
 @onready var title_white: Label = $TitleWhite
 @onready var title_black: Label = $TitleBlack
 
+@onready var black_rect: ColorRect = $CanvasLayer/BlackRect
+
 var selected = 0;
 
 func _process(delta: float) -> void:
@@ -32,9 +34,15 @@ func _process(delta: float) -> void:
 			transit_to_credit() 
 
 func transit_to_game() -> void:
+	var tween = get_tree().create_tween()
+	tween.tween_property(black_rect,"color",Color.BLACK, 1.0)
+	await tween.finished
 	get_tree().change_scene_to_file("res://scenes/game.tscn")
 	
 func transit_to_editor() -> void:
+	var tween = get_tree().create_tween()
+	tween.tween_property(black_rect,"color",Color.BLACK, 1.0)
+	await tween.finished
 	get_tree().change_scene_to_file("res://scenes/game_editor.tscn")
 	
 func transit_to_credit() -> void:

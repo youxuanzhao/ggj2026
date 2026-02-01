@@ -1,0 +1,39 @@
+[gd_resource type="Resource" script_class="LevelData" format=3 uid="uid://bj0thnysrisls"]
+
+[ext_resource type="Script" uid="uid://c6s3gxixlxerl" path="res://scripts/pattern_data.gd" id="1_i5o5l"]
+[ext_resource type="Script" uid="uid://dqaom3e0tkdro" path="res://scripts/piece_data.gd" id="2_njvvs"]
+[ext_resource type="Script" uid="uid://g0oh2qswljlj" path="res://scripts/level_data.gd" id="3_2sbnp"]
+
+[sub_resource type="Resource" id="Resource_i5o5l"]
+script = ExtResource("1_i5o5l")
+
+[sub_resource type="Resource" id="Resource_njvvs"]
+script = ExtResource("2_njvvs")
+id = 1
+shape_cells = [[0, 0], [0, 1], [1, 1]]
+
+[sub_resource type="Resource" id="Resource_2sbnp"]
+script = ExtResource("2_njvvs")
+id = 2
+color = "black"
+shape_cells = [[1, 0], [2, 0], [2, 1]]
+z_order = 1
+
+[sub_resource type="Resource" id="Resource_mylh8"]
+script = ExtResource("2_njvvs")
+id = 3
+shape_cells = [[0, 1], [0, 2], [1, 2]]
+z_order = 2
+
+[sub_resource type="Resource" id="Resource_7dgqo"]
+script = ExtResource("2_njvvs")
+id = 4
+color = "black"
+shape_cells = [[1, 1], [2, 1], [2, 2]]
+z_order = 3
+
+[resource]
+script = ExtResource("3_2sbnp")
+level_name = "level_6"
+pieces = Array[ExtResource("2_njvvs")]([SubResource("Resource_njvvs"), SubResource("Resource_2sbnp"), SubResource("Resource_mylh8"), SubResource("Resource_7dgqo")])
+patterns = Array[ExtResource("1_i5o5l")]([SubResource("Resource_i5o5l")])

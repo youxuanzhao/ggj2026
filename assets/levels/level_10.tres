@@ -1,0 +1,64 @@
+[gd_resource type="Resource" script_class="LevelData" format=3 uid="uid://if4m7axt0d76"]
+
+[ext_resource type="Script" uid="uid://c6s3gxixlxerl" path="res://scripts/pattern_data.gd" id="1_pcvof"]
+[ext_resource type="Script" uid="uid://dqaom3e0tkdro" path="res://scripts/piece_data.gd" id="2_ctqxw"]
+[ext_resource type="Script" uid="uid://g0oh2qswljlj" path="res://scripts/level_data.gd" id="3_qp2i0"]
+
+[sub_resource type="Resource" id="Resource_bfyjr"]
+script = ExtResource("1_pcvof")
+allowed_states = [[true, true, true], [false, false, false], [false, false, false]]
+
+[sub_resource type="Resource" id="Resource_6noh5"]
+script = ExtResource("1_pcvof")
+allowed_states = [[false, false, false], [false, false, false], [true, true, true]]
+
+[sub_resource type="Resource" id="Resource_vv31p"]
+script = ExtResource("2_ctqxw")
+id = 1
+shape_cells = [[0, 0], [1, 0], [1, 1], [2, 1]]
+z_order = 4
+
+[sub_resource type="Resource" id="Resource_cmwvg"]
+script = ExtResource("2_ctqxw")
+id = 2
+shape_cells = [[2, 0], [1, 1], [2, 1]]
+z_order = 3
+is_inverter = true
+
+[sub_resource type="Resource" id="Resource_1wk0h"]
+script = ExtResource("2_ctqxw")
+id = 3
+shape_cells = [[0, 1], [1, 1], [2, 1], [2, 2]]
+z_order = 2
+is_mask = true
+is_dynamic = true
+dynamic_pattern = [[[0, 2]], [[0, 1], [1, 1], [2, 1], [2, 2]]]
+
+[sub_resource type="Resource" id="Resource_gxpk5"]
+script = ExtResource("2_ctqxw")
+id = 4
+shape_cells = [[0, 2], [1, 2], [2, 2]]
+z_order = 5
+is_dynamic = true
+dynamic_pattern = [[]]
+
+[sub_resource type="Resource" id="Resource_ydi8e"]
+script = ExtResource("2_ctqxw")
+id = 5
+shape_cells = [[0, 2], [1, 2], [2, 2]]
+z_order = 1
+is_dynamic = true
+dynamic_pattern = [[[0, 0]], [[0, 2], [1, 2], [2, 2]]]
+
+[sub_resource type="Resource" id="Resource_aup58"]
+script = ExtResource("2_ctqxw")
+id = 6
+shape_cells = [[0, 0]]
+is_dynamic = true
+dynamic_pattern = [[[0, 2], [1, 2], [2, 2]], [[0, 0]]]
+
+[resource]
+script = ExtResource("3_qp2i0")
+level_name = "level_10"
+pieces = Array[ExtResource("2_ctqxw")]([SubResource("Resource_vv31p"), SubResource("Resource_cmwvg"), SubResource("Resource_1wk0h"), SubResource("Resource_gxpk5"), SubResource("Resource_ydi8e"), SubResource("Resource_aup58")])
+patterns = Array[ExtResource("1_pcvof")]([SubResource("Resource_bfyjr"), SubResource("Resource_6noh5")])

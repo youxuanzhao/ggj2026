@@ -1,0 +1,29 @@
+[gd_resource type="Resource" script_class="LevelData" format=3 uid="uid://b36nvwgmr71xf"]
+
+[ext_resource type="Script" uid="uid://c6s3gxixlxerl" path="res://scripts/pattern_data.gd" id="1_6b4yp"]
+[ext_resource type="Script" uid="uid://dqaom3e0tkdro" path="res://scripts/piece_data.gd" id="2_80wum"]
+[ext_resource type="Script" uid="uid://g0oh2qswljlj" path="res://scripts/level_data.gd" id="3_k8lgk"]
+
+[sub_resource type="Resource" id="Resource_1l2ll"]
+script = ExtResource("1_6b4yp")
+allowed_states = [[false, false, true], [true, false, false], [false, false, true]]
+
+[sub_resource type="Resource" id="Resource_75hbo"]
+script = ExtResource("2_80wum")
+id = 1
+shape_cells = [[0, 0], [1, 0], [2, 1], [0, 2], [1, 2]]
+is_dynamic = true
+dynamic_pattern = [[[1, 0], [2, 0], [0, 1], [1, 2], [2, 2]], [[0, 0], [1, 0], [2, 1], [0, 2], [1, 2]]]
+
+[sub_resource type="Resource" id="Resource_hqsx7"]
+script = ExtResource("2_80wum")
+id = 2
+color = "black"
+shape_cells = [[0, 0], [1, 1], [0, 2]]
+z_order = 1
+
+[resource]
+script = ExtResource("3_k8lgk")
+level_name = "level_8"
+pieces = Array[ExtResource("2_80wum")]([SubResource("Resource_75hbo"), SubResource("Resource_hqsx7")])
+patterns = Array[ExtResource("1_6b4yp")]([SubResource("Resource_1l2ll")])

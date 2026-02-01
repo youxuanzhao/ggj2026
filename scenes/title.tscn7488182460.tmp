@@ -60,12 +60,6 @@ label_settings = SubResource("LabelSettings_wosw1")
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1191809493]
 
-[node name="BlackRect" type="ColorRect" parent="CanvasLayer" unique_id=902484105]
-offset_right = 1920.0
-offset_bottom = 1080.0
-mouse_filter = 2
-color = Color(0, 0, 0, 0)
-
 [node name="ColorRect" type="ColorRect" parent="CanvasLayer" unique_id=2078838324]
 material = ExtResource("4_pyl7j")
 offset_right = 1920.0

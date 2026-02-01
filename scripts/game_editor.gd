@@ -27,6 +27,16 @@ class_name GameEditor
 # Bottom: save level
 @onready var level_name_input = $RightPanel/VBoxContainer/LevelNameInput
 @onready var save_level_btn = $RightPanel/VBoxContainer/SaveLevelBtn
+@onready var reset_level_btn = $RightPanel/VBoxContainer/ResetLevelBtn
+@onready var load_level_btn = $RightPanel/VBoxContainer2/LoadLevelBtn
+@onready var export_level_btn = $RightPanel/VBoxContainer2/ExportLevelBtn
+@onready var level_code_input = $RightPanel/VBoxContainer2/LevelCodeInput
+
+
+@onready var menu_effect: ColorRect = $CanvasLayer/MenuEffect
+@onready var menu: VBoxContainer = $CanvasLayer/Menu
+@onready var back_btn: Button = $CanvasLayer/Menu/BackBtn
+@onready var exit_btn: Button = $CanvasLayer/Menu/ExitBtn
 
 # internal builder state
 var builder_cells := []        # 3x3 bool active layout for piece shape
@@ -55,6 +65,13 @@ func _next_z_index() -> int:
 	return initial_z
 
 func _ready():
+	menu.visible = false
+	menu_effect.visible = false
+	
+	load_level_btn.pressed.connect(_on_load_level_btn_pressed)
+	export_level_btn.pressed.connect(_on_export_level_btn_pressed)
+	back_btn.pressed.connect(_on_back_btn_pressed)
+	exit_btn.pressed.connect(_on_exit_btn_pressed)
 	_init_builder_grid()
 	_init_goal_grid()
 	_connect_ui()
@@ -130,7 +147,7 @@ func _connect_ui():
 	save_goal_btn.connect("pressed", Callable(self, "_on_save_goal_pressed"))
 
 	save_level_btn.connect("pressed", Callable(self, "_on_save_level_pressed"))
-
+	reset_level_btn.connect("pressed", Callable(self, "_on_reset_level_pressed"))
 	# option change
 	color_option.connect("item_selected", Callable(self, "_on_color_option_changed"))
 	is_mask_cb.connect("toggled", Callable(self, "_on_mask_toggled"))
@@ -382,9 +399,167 @@ func _on_save_level_pressed():
 	else:
 		print("Saved level to %s" % path)
 
-# -------------------------
-# Helper: UI interactions for goal & builder etc
-# -------------------------
-# (already implemented above)
-# -------------------------
-# End of EditorScene.gd
+func _on_reset_level_pressed():
+	_clear_builder()
+	goal_frames.clear()
+	logic.pieces.clear()
+	logic.level_patterns.clear()
+	initial_z = -1
+
+func _process(delta: float) -> void:
+	if Input.is_action_just_pressed("escape"):
+		menu.visible = !menu.visible
+		menu_effect.visible = !menu_effect.visible
+
+func _on_back_btn_pressed() -> void:
+	menu.visible = false
+	menu_effect.visible = false
+
+func _on_exit_btn_pressed() -> void:
+	get_tree().change_scene_to_file("res://scenes/title.tscn")
+
+# Export current runtime level to a shareable string (base64 of XORed JSON).
+# passphrase optional; use same passphrase to load.
+func export_level_to_string(passphrase: String = "") -> String:
+	# 1) Build a lightweight serializable dict representing level
+	var payload := {}
+	# metadata
+	payload["level_name"] = logic.get("level_name") if logic.get("level_name") != "" else "exported_level"
+	payload["grid_size"] = [logic.grid_w, logic.grid_h]
+
+	# pieces: convert runtime pieces (dicts) into simple variant-friendly arrays
+	var pieces_arr := []
+	for p in logic.pieces:
+		var pd := {
+			"id": int(p.get("id", 0)),
+			"color": p.get("color", "black"),
+			"z_order": int(p.get("z_order", 0)),
+			"shape_cells": p.get("shape_cells", []).duplicate(true),
+			"is_mask": bool(p.get("is_mask", false)),
+			"is_inverter": bool(p.get("is_inverter", false)),
+			"is_dynamic": bool(p.get("is_dynamic", false)),
+			"dynamic_pattern": p.get("dynamic_pattern", []).duplicate(true)
+		}
+		pieces_arr.append(pd)
+	payload["pieces"] = pieces_arr
+
+	# patterns: level_patterns may be resources; convert to plain arrays
+	var pats := []
+	for pat in logic.level_patterns:
+		if pat == null:
+			continue
+		# PatternData.allowed_states assumed to be 3x3 of booleans or 1/2 ints; keep as-is
+		pats.append(pat.allowed_states.duplicate(true))
+	payload["patterns"] = pats
+
+	# 2) JSON encode
+	var json_text = JSON.stringify(payload)
+
+	# 3) UTF-8 bytes
+	var bytes = json_text.to_utf8_buffer() # PackedByteArray
+
+	# 4) optional XOR "encryption" with passphrase
+	if passphrase != "":
+		var key_bytes = passphrase.to_utf8_buffer()
+		var klen = key_bytes.size()
+		if klen == 0:
+			# fallback - shouldn't happen
+			pass
+		else:
+			for i in range(bytes.size()):
+				# XOR each byte with key (looped)
+				bytes[i] = bytes[i] ^ key_bytes[i % klen]
+
+	# 5) Base64 encode to produce shareable string
+	var b64 = Marshalls.raw_to_base64(bytes)  # PackedByteArray -> base64 String
+	# Optional: add a small prefix to indicate version / that this is our encoded level
+	return "OCCLU" + b64
+
+# Load a level from a string produced by export_level_to_string and load it into logic.
+# Returns true on success, false on failure.
+func load_level_from_string(s: String, passphrase: String = "") -> bool:
+	# validate prefix if present
+	var payload_b64 := s
+	if s.begins_with("OCCLU"):
+		payload_b64 = s.substr(5, s.length() - 5)
+	else:
+		return false
+
+	# Base64 -> bytes
+	var ok_bytes := PackedByteArray()
+	# PackedByteArray has a helper to decode base64 in Godot 4; use from_base64() if present.
+	# The following works in Godot 4: PackedByteArray.from_base64(payload_b64)
+	# If your engine doesn't have that exact API, replace with appropriate base64 decode.
+	ok_bytes = Marshalls.base64_to_raw(payload_b64)
+
+	# XOR with passphrase if provided
+	if passphrase != "":
+		var key_bytes := passphrase.to_utf8_buffer()
+		var klen := key_bytes.size()
+		if klen > 0:
+			for i in range(ok_bytes.size()):
+				ok_bytes[i] = ok_bytes[i] ^ key_bytes[i % klen]
+
+	# Convert bytes back to JSON string
+	var json_text := ok_bytes.get_string_from_utf8()
+
+	# Parse JSON
+	var jres = JSON.parse_string(json_text)
+	if jres == null:
+		push_error("Failed to parse level JSON: %s" % jres.error_string)
+		return false
+	var data = jres
+
+	# Build LevelData resource from parsed data
+	var ld = LevelData.new()
+	if "level_name" in data:
+		ld.level_name = str(data["level_name"])
+	# grid_size optional (we assume 3x3 generally)
+	if "grid_size" in data:
+		var gs = data["grid_size"]
+		if typeof(gs) == TYPE_ARRAY and gs.size() >= 2:
+			ld.grid_size = Vector2i(int(gs[0]), int(gs[1]))
+
+	# reconstruct pieces as PieceData resources
+	var res_pieces : Array[PieceData] = []
+	if "pieces" in data and typeof(data["pieces"]) == TYPE_ARRAY:
+		for pd in data["pieces"]:
+			var piece_res = PieceData.new()
+			if "id" in pd:
+				piece_res.id = int(pd["id"])
+			if "color" in pd:
+				piece_res.color = str(pd["color"])
+			if "z_order" in pd:
+				piece_res.z_order = int(pd["z_order"])
+			if "shape_cells" in pd:
+				piece_res.shape_cells = pd["shape_cells"]
+			if "is_mask" in pd:
+				piece_res.is_mask = bool(pd["is_mask"])
+			if "is_inverter" in pd:
+				piece_res.is_inverter = bool(pd["is_inverter"])
+			if "is_dynamic" in pd:
+				piece_res.is_dynamic = bool(pd["is_dynamic"])
+			if "dynamic_pattern" in pd:
+				piece_res.dynamic_pattern = pd["dynamic_pattern"]
+			res_pieces.append(piece_res)
+	ld.pieces = res_pieces
+
+	# patterns
+	var pats : Array[PatternData] = []
+	if "patterns" in data and typeof(data["patterns"]) == TYPE_ARRAY:
+		for p in data["patterns"]:
+			var pat_res = PatternData.new()
+			pat_res.allowed_states = p
+			pats.append(pat_res)
+	ld.patterns = pats
+
+	# finally load into logic
+	logic.load_level_from_resource(ld)
+	return true
+
+func _on_load_level_btn_pressed():
+	if level_code_input.text != "":
+		load_level_from_string(level_code_input.text)
+
+func _on_export_level_btn_pressed():
+	level_code_input.text = export_level_to_string()

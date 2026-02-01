@@ -2,10 +2,98 @@
 
 [ext_resource type="Script" uid="uid://wjle3cuvwwub" path="res://scripts/game_manager.gd" id="1_yqjtg"]
 [ext_resource type="Script" uid="uid://dvgpta3lctfil" path="res://scripts/game_renderer.gd" id="2_yqjtg"]
+[ext_resource type="Material" uid="uid://dd4nayjnqv5vy" path="res://assets/shaders/crt_effect.tres" id="3_lnu2h"]
+[ext_resource type="FontFile" uid="uid://cani70bdd6xyd" path="res://assets/fonts/JetBrainsMono-Regular.ttf" id="4_lbhrr"]
+[ext_resource type="StyleBox" uid="uid://txh3gl3pbf7g" path="res://assets/shaders/new_style_box_flat.tres" id="5_iywne"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_iywne"]
+font = ExtResource("4_lbhrr")
+font_size = 32
 
 [node name="GameManager" type="Node2D" unique_id=163313851]
 script = ExtResource("1_yqjtg")
 
 [node name="GameRenderer" type="Node2D" parent="." unique_id=710285525]
-position = Vector2(753, 298)
+position = Vector2(788, 308)
 script = ExtResource("2_yqjtg")
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1262727252]
+
+[node name="BlackRect" type="ColorRect" parent="CanvasLayer" unique_id=1304573838]
+offset_right = 1920.0
+offset_bottom = 1080.0
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
+
+[node name="MenuEffect" type="ColorRect" parent="CanvasLayer" unique_id=739913526]
+offset_right = 1920.0
+offset_bottom = 1080.0
+color = Color(0, 0, 0, 0.47058824)
+metadata/_edit_use_anchors_ = true
+
+[node name="Menu" type="VBoxContainer" parent="CanvasLayer" unique_id=2065160036]
+anchors_preset = 13
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -286.0
+offset_right = 292.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="BackBtn" type="Button" parent="CanvasLayer/Menu" unique_id=2027688246]
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_lbhrr")
+text = "Back to game"
+
+[node name="HelpBtn" type="Button" parent="CanvasLayer/Menu" unique_id=379372987]
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_lbhrr")
+text = "Help
+"
+
+[node name="SettingBtn" type="Button" parent="CanvasLayer/Menu" unique_id=723895912]
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_lbhrr")
+text = "Settings
+"
+
+[node name="ExitBtn" type="Button" parent="CanvasLayer/Menu" unique_id=433927790]
+custom_minimum_size = Vector2(0, 60)
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_lbhrr")
+text = "Quit to menu
+"
+
+[node name="ColorRect" type="ColorRect" parent="CanvasLayer" unique_id=1785889457]
+material = ExtResource("3_lnu2h")
+offset_right = 1920.0
+offset_bottom = 1080.0
+mouse_filter = 2
+
+[node name="LevelSelector" type="VBoxContainer" parent="CanvasLayer" unique_id=175936982]
+custom_minimum_size = Vector2(200, 0)
+offset_left = 72.0
+offset_top = 35.0
+offset_right = 272.0
+offset_bottom = 108.0
+
+[node name="Label" type="Label" parent="CanvasLayer/LevelSelector" unique_id=1726349121]
+layout_mode = 2
+text = "Levels"
+label_settings = SubResource("LabelSettings_iywne")
+horizontal_alignment = 1
+
+[node name="ItemList" type="ItemList" parent="CanvasLayer/LevelSelector" unique_id=1550882296]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("4_lbhrr")
+theme_override_styles/panel = ExtResource("5_iywne")
+allow_search = false
+auto_height = true
+item_count = 1
+item_0/text = "level_1"

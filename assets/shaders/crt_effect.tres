@@ -1,0 +1,13 @@
+[gd_resource type="ShaderMaterial" format=3 uid="uid://dd4nayjnqv5vy"]
+
+[ext_resource type="Shader" uid="uid://vo2xcxndx6r5" path="res://assets/shaders/crt_effect.gdshader" id="1_0sbyq"]
+
+[resource]
+shader = ExtResource("1_0sbyq")
+shader_parameter/resolution = Vector2(1920, 1080)
+shader_parameter/scan_line_amount = 0.70000003325
+shader_parameter/warp_amount = 0.350000016625
+shader_parameter/vignette_amount = 0.5
+shader_parameter/vignette_intensity = 0.3
+shader_parameter/grille_amount = 0.05
+shader_parameter/brightness_boost = 1.2
