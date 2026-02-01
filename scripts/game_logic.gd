@@ -14,8 +14,14 @@ var selected_offset: Vector2 = Vector2.ZERO
 var undo_stack: Array = []
 var redo_stack: Array = []
 
-# loaded pattern resources (sequence)
-var level_patterns: Array[Resource] = []
+# move/transaction state
+var move_in_progress: bool = false
+var _move_snapshot_pushed: bool = false
+
+var goal_frame_status: Array = []          # 每个 pattern/frame 的布尔通过状态（true/false）
+var overall_goal_satisfied: bool = false  # 整体是否已满足（上一次检查状态）
+
+var level_patterns: Array[PatternData] = []
 
 # tick timer (auto stepping)
 var _tick_timer: Timer = null
@@ -28,6 +34,7 @@ func _ready():
 	_tick_timer.autostart = false
 	add_child(_tick_timer)
 	_tick_timer.timeout.connect(Callable(self, "_on_tick_timeout"))
+	
 
 # ---------------------
 # Loading
@@ -176,7 +183,7 @@ func compute_visible_state_at(at_tick: int) -> Array:
 		var col = []
 		for y in range(grid_h):
 			col.append({
-				"fill_color": null,         # "white"/"black"/null
+				"fill_color": "black",         # "white"/"black"/null
 				"stroke_color": null,
 				"is_black_due_to_mask": false
 			})
@@ -212,7 +219,7 @@ func compute_visible_state() -> Array:
 	return compute_visible_state_at(tick)
 
 func _z_desc(a, b) -> int:
-	return b["z_order"] - a["z_order"]
+	return b["z_order"] < a["z_order"]
 
 # find the visible color below index start_i in sorted array (with tick)
 func _find_below_color(sorted: Array, start_i: int, x: int, y: int, at_tick: int) -> String:
@@ -237,6 +244,54 @@ func _invert_color(c: String) -> String:
 	else:
 		return "white"
 
+# Ensure piece ids are unique and z-orders are normalized (0..N-1 by ascending z)
+# Then emit state_changed so views update.
+func reload_pieces() -> void:
+	# 1) ensure ids unique: if duplicates or <=0, assign next free positive id
+	var used := {}
+	var next_id := 1
+	for i in range(pieces.size()):
+		var p = pieces[i]
+		var id = int(p.get("id", 0))
+		if id <= 0 or id in used:
+			# find next free
+			while next_id in used:
+				next_id += 1
+			p["id"] = next_id
+			used[next_id] = true
+			next_id += 1
+		else:
+			used[id] = true
+			if id >= next_id:
+				next_id = id + 1
+		pieces[i] = p
+
+	# 2) normalize z-orders: stable sort by current z, then reassign 0..N-1
+	var sorted_indices := []
+	for i in range(pieces.size()):
+		sorted_indices.append(i)
+	# sort indices by pieces[idx].z_order then by id to be stable
+	sorted_indices.sort_custom(Callable(self, "_cmp_index_by_z_then_id"))
+
+	var new_z := 0
+	for idx in sorted_indices:
+		pieces[idx]["z_order"] = new_z
+		new_z += 1
+
+	emit_signal("state_changed")
+
+# comparator for sorting indices by z, then by id (ascending)
+func _cmp_index_by_z_then_id(a_idx, b_idx) -> int:
+	var a = pieces[a_idx]
+	var b = pieces[b_idx]
+	var az = int(a.get("z_order", 0))
+	var bz = int(b.get("z_order", 0))
+	if az != bz:
+		return az - bz
+	var aid = int(a.get("id", 0))
+	var bid = int(b.get("id", 0))
+	return aid - bid
+
 # ---------------------
 # Selection / Movement (keyboard-driven)
 # ---------------------
@@ -248,59 +303,138 @@ func select_piece_at(x: int, y: int) -> int:
 		if piece_occupies_cell(p, x, y, tick):
 			selected_piece_id = p["id"]
 			selected_offset = Vector2.ZERO
+			# do NOT push undo here; begin snapshot only when player actually moves or changes z
+			_move_snapshot_pushed = false
+			move_in_progress = false
 			emit_signal("state_changed")
 			return selected_piece_id
 	selected_piece_id = -1
 	emit_signal("state_changed")
 	return -1
 
-# move selected piece by dx,dy (grid)
 func move_selected(dx: int, dy: int) -> bool:
+	# no selection
 	if selected_piece_id == -1:
 		return false
 	var idx = _find_piece_index_by_id(selected_piece_id)
 	if idx == -1:
 		return false
-	_push_undo()
+
 	var p = pieces[idx]
-	# move base shape_cells
-	var new_cells = []
-	for i in range(p["shape_cells"].size()):
-		new_cells.append([ int(p["shape_cells"][i][0]) + dx, int(p["shape_cells"][i][1]) + dy ])
-	p["shape_cells"] = new_cells
-	# move dynamic patterns if present
+
+	# --- 1) compute new base cells and new dynamic patterns, validate bounds BEFORE mutating state ---
+	var new_cells := []
+	for c in p.get("shape_cells", []):
+		var nx = int(c[0]) + dx
+		var ny = int(c[1]) + dy
+		# out-of-bounds check
+		if nx < 0 or nx >= grid_w or ny < 0 or ny >= grid_h:
+			return false
+		new_cells.append([nx, ny])
+
+	# if dynamic, check every pattern frame
+	var new_patterns := []
 	if p.get("is_dynamic", false):
-		var new_patterns = []
-		for pat in p["dynamic_pattern"]:
-			var newpat = []
+		for pat in p.get("dynamic_pattern", []):
+			var newpat := []
 			for c in pat:
-				newpat.append([ int(c[0]) + dx, int(c[1]) + dy ])
+				var nx = int(c[0]) + dx
+				var ny = int(c[1]) + dy
+				if nx < 0 or nx >= grid_w or ny < 0 or ny >= grid_h:
+					return false
+				newpat.append([nx, ny])
 			new_patterns.append(newpat)
+
+	# --- 2) begin transaction (snapshot) once, then apply the validated move ---
+	_ensure_begin_move()  # or _push_undo() if you didn't adopt _ensure_begin_move
+
+	# apply new base shape cells
+	p["shape_cells"] = new_cells
+
+	# apply dynamic patterns if present
+	if p.get("is_dynamic", false):
 		p["dynamic_pattern"] = new_patterns
+
+	# commit back
 	pieces[idx] = p
 	emit_signal("state_changed")
 	return true
 
-# change Z for selected piece by delta (+1 up, -1 down)
+
+
+# change Z for selected piece by swapping with nearest piece above/below.
+# delta: +1 -> swap with nearest higher z; -1 -> swap with nearest lower z
 func change_z_selected(delta: int) -> bool:
 	if selected_piece_id == -1:
 		return false
 	var idx = _find_piece_index_by_id(selected_piece_id)
 	if idx == -1:
 		return false
-	_push_undo()
-	pieces[idx]["z_order"] = int(pieces[idx]["z_order"]) + delta
+
+	var cur_z = int(pieces[idx]["z_order"])
+	var candidate_idx: int = -1
+	var candidate_z: int
+
+	if delta > 0:
+		candidate_z = cur_z + 1
+		for i in range(pieces.size()):
+			if i == idx:
+				continue
+			var z = int(pieces[i]["z_order"])
+			if z == candidate_z:
+				candidate_idx = i
+	else:
+		candidate_z = cur_z - 1
+		for i in range(pieces.size()):
+			if i == idx:
+				continue
+			var z = int(pieces[i]["z_order"])
+			if z == candidate_z:
+				candidate_idx = i
+
+	if candidate_idx == -1:
+		return false
+
+	# begin transaction (single undo snapshot) instead of pushing every time
+	_ensure_begin_move()
+
+	var temp = pieces[idx]["z_order"]
+	pieces[idx]["z_order"] = pieces[candidate_idx]["z_order"]
+	pieces[candidate_idx]["z_order"] = temp
+	
+	print("swapped"+str(idx)+str(candidate_idx))
+	print(pieces[idx]["z_order"]) 
+	print(pieces[candidate_idx]["z_order"])
+
 	emit_signal("state_changed")
 	return true
 
-func deselect():
+# Ensure we push an undo snapshot exactly once when the player starts mutating the selected piece.
+func _ensure_begin_move():
+	if selected_piece_id == -1:
+		return
+	if not _move_snapshot_pushed:
+		_push_undo()
+		_move_snapshot_pushed = true
+		move_in_progress = true
+
+
+func confirm_selection():
+	# finalize selection changes (they are already applied to runtime pieces)
 	selected_piece_id = -1
+	move_in_progress = false
+	_move_snapshot_pushed = false
 	emit_signal("state_changed")
 
-# confirm (drop) selection: simply deselect in this model
-func confirm_selection():
+func deselect():
+	# if you want deselect to undo the in-progress changes instead of confirming them,
+	# call undo() here. Decide which UX you prefer.
+	# Here we treat deselect as confirming current changes (no rollback).
 	selected_piece_id = -1
+	move_in_progress = false
+	_move_snapshot_pushed = false
 	emit_signal("state_changed")
+
 
 # ---------------------
 # Tick control
@@ -323,12 +457,65 @@ func step_tick():
 
 func _on_tick_timeout():
 	step_tick()
+	_update_goal_status()
+	
+func _update_goal_status() -> void:
+	# compute status for each pattern in level_patterns
+	goal_frame_status.clear()
+	overall_goal_satisfied = false
+
+	if level_patterns == null or level_patterns.is_empty():
+		# nothing to check; leave empty
+		emit_signal("state_changed")
+		return
+
+	var all_ok := true
+	for offset in range(level_patterns.size()):
+		var pat = level_patterns[offset]
+		if pat == null:
+			goal_frame_status.append(false)
+			all_ok = false
+			continue
+		var at_tick = tick + offset
+		var grid = compute_visible_state_at(at_tick)
+		var frame_ok := true
+		for y in range(grid_h):
+			for x in range(grid_w):
+				var want = pat.allowed_states[y][x]
+				var actual = grid[x][y]
+				var actual_color = "black" if actual["is_black_due_to_mask"] or actual["fill_color"] == null or actual["fill_color"] == "black" else "white"
+				if want and actual_color != "white":
+					frame_ok = false
+					break
+				if !want and actual_color != "black":
+					frame_ok = false
+					break
+			if not frame_ok:
+				break
+		goal_frame_status.append(frame_ok)
+		if not frame_ok:
+			all_ok = false
+
+	# if all frames ok and previously not satisfied, print once
+	if all_ok and not overall_goal_satisfied:
+		print("Goal satisfied")
+	overall_goal_satisfied = all_ok
+
+	# notify views
+	emit_signal("state_changed")
+
+# === 公开访问函数 ===
+func get_goal_frame_status() -> Array:
+	# return a shallow copy for safety
+	return goal_frame_status.duplicate()
 
 # ---------------------
 # Goal check (multi-frame PatternData sequence)
 # ---------------------
 # PatternData.allowed_states: 0=don't care,1=white,2=black
 # level_patterns[0] -> tick, [1] -> tick+1, ...
+# New goal check: patterns is an Array of PatternData (each allowed_states[y][x] is boolean)
+# Each PatternData corresponds to tick + offset where offset = index in array.
 func is_goal_satisfied() -> bool:
 	if level_patterns.is_empty():
 		return false
@@ -340,13 +527,12 @@ func is_goal_satisfied() -> bool:
 		var grid = compute_visible_state_at(at_tick)
 		for y in range(grid_h):
 			for x in range(grid_w):
-				var want = int(pat.allowed_states[y][x])
-				if want == 0:
-					continue
+				# pattern stores boolean: true => must be white; false => must be black
+				var want_white = bool(pat.allowed_states[y][x])
 				var actual = grid[x][y]
-				var color = "black" if actual["is_black_due_to_mask"] or actual["fill_color"] == "black" or actual["fill_color"] == null else "white"
-				if want == 1 and color != "white":
+				var actual_color = "black" if actual["is_black_due_to_mask"] or actual["fill_color"] == "black" or actual["fill_color"] == null else "white"
+				if want_white and actual_color != "white":
 					return false
-				if want == 2 and color != "black":
+				if (not want_white) and actual_color != "black":
 					return false
 	return true

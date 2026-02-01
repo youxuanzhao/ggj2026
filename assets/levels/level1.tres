@@ -16,13 +16,23 @@ metadata/_custom_type_script = "uid://dqaom3e0tkdro"
 
 [sub_resource type="Resource" id="Resource_6r273"]
 script = ExtResource("1_133bd")
+id = 1
 color = "black"
 shape_cells = [[1, 1], [1, 2]]
 z_order = 1
 metadata/_custom_type_script = "uid://dqaom3e0tkdro"
 
+[sub_resource type="Resource" id="Resource_e23yg"]
+script = ExtResource("1_133bd")
+id = 2
+shape_cells = [[2, 2], [2, 1], [1, 2]]
+z_order = 2
+is_mask = true
+dynamic_pattern = [[[2, 2], [2, 1], [1, 2]], [[1, 1], [2, 1], [1, 2]]]
+metadata/_custom_type_script = "uid://dqaom3e0tkdro"
+
 [resource]
 script = ExtResource("2_vgqkp")
-pieces = Array[ExtResource("1_133bd")]([SubResource("Resource_vgqkp"), SubResource("Resource_6r273")])
+pieces = Array[ExtResource("1_133bd")]([SubResource("Resource_vgqkp"), SubResource("Resource_6r273"), SubResource("Resource_e23yg")])
 patterns = Array[ExtResource("1_vgqkp")]([SubResource("Resource_tg8vp")])
 metadata/_custom_type_script = "uid://g0oh2qswljlj"

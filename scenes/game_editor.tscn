@@ -1,0 +1,120 @@
+[gd_scene format=3 uid="uid://dr62kt1ijxi40"]
+
+[ext_resource type="Script" uid="uid://dvgpta3lctfil" path="res://scripts/game_renderer.gd" id="1_3qtki"]
+[ext_resource type="Script" uid="uid://1lxai4vn71o" path="res://scripts/game_editor.gd" id="1_gsv6k"]
+
+[node name="GameEditor" type="Node2D" unique_id=469005631]
+script = ExtResource("1_gsv6k")
+
+[node name="GameArea" type="Node2D" parent="." unique_id=1501106119]
+
+[node name="GameRenderer" type="Node2D" parent="GameArea" unique_id=2087442585]
+position = Vector2(770, 288)
+script = ExtResource("1_3qtki")
+metadata/_custom_type_script = "uid://dvgpta3lctfil"
+
+[node name="RightPanel" type="Panel" parent="." unique_id=1178415719]
+offset_left = 1120.0
+offset_top = 1.0
+offset_right = 1917.0
+offset_bottom = 1078.0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="RightPanel" unique_id=523218143]
+layout_mode = 0
+offset_right = 471.0
+offset_bottom = 711.0
+
+[node name="BuilderPanel" type="VBoxContainer" parent="RightPanel/HBoxContainer" unique_id=462304834]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="RightPanel/HBoxContainer/BuilderPanel" unique_id=1214519243]
+z_index = 1
+layout_mode = 2
+text = "Builder"
+
+[node name="BuildGrid" type="GridContainer" parent="RightPanel/HBoxContainer/BuilderPanel" unique_id=857526907]
+layout_mode = 2
+columns = 3
+
+[node name="HBoxContainer" type="HBoxContainer" parent="RightPanel/HBoxContainer/BuilderPanel" unique_id=1430406703]
+layout_mode = 2
+
+[node name="ColorOption" type="OptionButton" parent="RightPanel/HBoxContainer/BuilderPanel/HBoxContainer" unique_id=628064874]
+layout_mode = 2
+item_count = 2
+popup/item_0/text = "white"
+popup/item_0/id = 0
+popup/item_1/text = "black"
+popup/item_1/id = 1
+
+[node name="IsMask" type="CheckBox" parent="RightPanel/HBoxContainer/BuilderPanel/HBoxContainer" unique_id=1174136370]
+layout_mode = 2
+text = "Is Mask"
+
+[node name="IsInverter" type="CheckBox" parent="RightPanel/HBoxContainer/BuilderPanel/HBoxContainer" unique_id=98486552]
+layout_mode = 2
+text = "Is Inverter"
+
+[node name="IsDynamic" type="CheckBox" parent="RightPanel/HBoxContainer/BuilderPanel/HBoxContainer" unique_id=1240089874]
+layout_mode = 2
+text = "Is Dynamic"
+
+[node name="Label2" type="Label" parent="RightPanel/HBoxContainer/BuilderPanel" unique_id=1539081213]
+layout_mode = 2
+text = "Dynamic Pattern Frames"
+
+[node name="DynList" type="ItemList" parent="RightPanel/HBoxContainer/BuilderPanel" unique_id=885091247]
+custom_minimum_size = Vector2(0, 80)
+layout_mode = 2
+
+[node name="AddStateBtn" type="Button" parent="RightPanel/HBoxContainer/BuilderPanel" unique_id=2145180737]
+layout_mode = 2
+text = "Add State"
+
+[node name="InsertBtn" type="Button" parent="RightPanel/HBoxContainer/BuilderPanel" unique_id=1812506350]
+layout_mode = 2
+text = "Insert To Game"
+
+[node name="GoalPanel" type="VBoxContainer" parent="RightPanel/HBoxContainer" unique_id=551379636]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="RightPanel/HBoxContainer/GoalPanel" unique_id=869404288]
+layout_mode = 2
+text = "Goal Editor"
+
+[node name="GoalGrid" type="GridContainer" parent="RightPanel/HBoxContainer/GoalPanel" unique_id=1219065236]
+layout_mode = 2
+columns = 3
+
+[node name="GoalIsDynamic" type="CheckBox" parent="RightPanel/HBoxContainer/GoalPanel" unique_id=1215234941]
+layout_mode = 2
+text = "Is Dynamic"
+
+[node name="Label2" type="Label" parent="RightPanel/HBoxContainer/GoalPanel" unique_id=198363658]
+layout_mode = 2
+text = "Dynamic Pattern Frames"
+
+[node name="GoalDynList" type="ItemList" parent="RightPanel/HBoxContainer/GoalPanel" unique_id=816736861]
+custom_minimum_size = Vector2(0, 80)
+layout_mode = 2
+
+[node name="GoalAddStateBtn" type="Button" parent="RightPanel/HBoxContainer/GoalPanel" unique_id=406538373]
+layout_mode = 2
+text = "Add State"
+
+[node name="SaveGoalBtn" type="Button" parent="RightPanel/HBoxContainer/GoalPanel" unique_id=942774633]
+layout_mode = 2
+text = "Save Goal"
+
+[node name="VBoxContainer" type="VBoxContainer" parent="RightPanel" unique_id=971516832]
+layout_mode = 0
+offset_top = 907.0
+offset_right = 387.0
+offset_bottom = 980.0
+
+[node name="LevelNameInput" type="LineEdit" parent="RightPanel/VBoxContainer" unique_id=2020985204]
+layout_mode = 2
+
+[node name="SaveLevelBtn" type="Button" parent="RightPanel/VBoxContainer" unique_id=1533327841]
+layout_mode = 2
+text = "Save Level"
